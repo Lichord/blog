@@ -1,0 +1,87 @@
+<template>
+<div  class="login_form">        
+    <!-- 登录表单区域 -->
+    <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules">
+        <!-- 用户名 -->
+        <el-form-item prop="id">
+            <el-input v-model="loginForm.id" placeholder="账号"></el-input>
+        </el-form-item>
+        <!-- 密码 -->
+        <el-form-item prop="password">
+            <el-input v-model="loginForm.password" placeholder="密码" type="password"></el-input>
+        </el-form-item>
+        <!-- 按钮区域 -->
+        <el-form-item class="btns">
+            <el-button type="primary" @click="login">登录</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      // 这是登录表单的数据绑定对象
+      loginForm: {
+        id: '',
+        password: ''
+      },
+      // 这是表单的验证规则对象
+      loginFormRules: {
+        // 验证用户名是否合法
+        id: [
+          { required: true, message: '请输入登录账号', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+        ],
+        // 验证密码是否合法
+        password: [
+          { required: true, message: '请输入登录密码', trigger: 'blur' },
+          { min: 6, max: 16, message: '长度在 6 到 16 个字符', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    login() {
+      //参数valid是表单预验证的结果，是一个布尔值
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('user/login', this.loginForm)
+        if (res.code !== 200) return this.$message.error('登录失败！')
+        this.$message.success('登录成功')
+        // 1. 将登录成功之后的 token，保存到客户端的 sessionStorage 中
+        //   1.1 项目中出了登录之外的其他API接口，必须在登录之后才能访问
+        //   1.2 token 只应在当前网站打开期间生效，所以将 token 保存在 sessionStorage 中
+        // 保存到sessionStorage中而不是localStorage中，因为session是会话期间的存储机制，
+        // window.sessionStorage.setItem('token', res.data.token)
+        // 2. 通过编程式导航跳转到后台主页，路由地址是 /home
+        this.$router.push('/home')
+      })
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.login_form {
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width:100%;
+  padding:0 40px;
+  transform: translate(-50%, -50%);
+  
+}
+
+.btns {
+  display: flex;
+  justify-content: center;
+}
+
+a{
+  color: lightcoral;
+}
+</style>
+   
